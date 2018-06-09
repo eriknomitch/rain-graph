@@ -1,66 +1,48 @@
-# import socket
-
-# ------------------------------------------------
-# ------------------------------------------------
-# ------------------------------------------------
-try:
-    import usocket as _socket
-except:
-    import _socket
-try:
-    import ussl as ssl
-except:
-    import ssl
-
-def https_get(domain, path, use_stream=True):
-    s = _socket.socket()
-    ai = _socket.getaddrinfo(domain, 443)
-
-    print("Address infos:", ai)
-    addr = ai[0][-1]
-
-    print("Connect address:", addr)
-    s.connect(addr)
-
-    s = ssl.wrap_socket(s)
-
-    if use_stream:
-        # Both CPython and MicroPython SSLSocket objects support read() and
-        # write() methods.
-        s.write(b"GET {} HTTP/1.0\r\n\r\n".format(path))
-        print(s.read(4096))
-    else:
-        # MicroPython SSLSocket objects implement only stream interface, not
-        # socket interface
-        s.send(b"GET %s HTTP/1.0\r\n\r\n", path)
-        print(s.recv(4096))
-
-    s.close()
-
-# ------------------------------------------------
-# NEOPIXEL ---------------------------------------
-# ------------------------------------------------
+from umqtt import MQTTClient
+from machine import Pin
+import ubinascii
 import machine
-import neopixel
-import time
+import micropython
 
-NUM_PIXELS = 16
+# ESP8266 ESP-12 modules have blue, active-low LED on GPIO2, replace
+# with something else if needed.
+led = Pin(2, Pin.OUT, value=1)
 
-np = neopixel.NeoPixel(machine.Pin(25), NUM_PIXELS)
+# Default MQTT server to connect to
+SERVER = "192.168.1.10"
+CLIENT_ID = ubinascii.hexlify(machine.unique_id())
+TOPIC = b"rain-meter"
 
-def np_clear():
-    for i in range(NUM_PIXELS):
-        np[i] = (0, 0, 0)
-    np.write()
+state = 0
 
-def np_test():
-    for times in range(3):
-        for i in range(NUM_PIXELS):
-            np[i] = (0, 255, 0)
-            np.write()
-            time.sleep_ms(20)
-        np_clear()
+def sub_cb(topic, msg):
+    global state
+    print((topic, msg))
+    if msg == b"on":
+        led.value(0)
+        state = 1
+    elif msg == b"off":
+        led.value(1)
+        state = 0
+    elif msg == b"toggle":
+        # LED is inversed, so setting it to current state
+        # value will make it toggle
+        led.value(state)
+        state = 1 - state
 
-def ds_test():
-    https_get('api.darksky.net', '/forecast/99352fbb407a033341e9e421b84f7ff2/41.900303,-87.620142?exclude=hourly,minutely,daily,alerts,flags&units=si')
+
+def main(server=SERVER):
+    c = MQTTClient(CLIENT_ID, server)
+    # Subscribed messages will be delivered to this callback
+    c.set_callback(sub_cb)
+    c.connect()
+    c.subscribe(TOPIC)
+    print("Connected to %s, subscribed to %s topic" % (server, TOPIC))
+
+    try:
+        while 1:
+            #micropython.mem_info()
+            c.wait_msg()
+    finally:
+        c.disconnect()
 
