@@ -3,33 +3,27 @@ from machine import Pin
 import ubinascii
 import machine
 import micropython
+import neopixel
+import ujson
 
-# ESP8266 ESP-12 modules have blue, active-low LED on GPIO2, replace
-# with something else if needed.
-led = Pin(2, Pin.OUT, value=1)
-
-# Default MQTT server to connect to
 SERVER = "192.168.1.10"
 CLIENT_ID = ubinascii.hexlify(machine.unique_id())
-TOPIC = b"rain-meter"
+TOPIC = b"rain-graph"
+NUM_PIXELS = 16
 
-state = 0
+np = neopixel.NeoPixel(machine.Pin(25), NUM_PIXELS)
 
 def sub_cb(topic, msg):
-    global state
+    global np
     print((topic, msg))
-    if msg == b"on":
-        led.value(0)
-        state = 1
-    elif msg == b"off":
-        led.value(1)
-        state = 0
-    elif msg == b"toggle":
-        # LED is inversed, so setting it to current state
-        # value will make it toggle
-        led.value(state)
-        state = 1 - state
+    print(ujson.loads(msg))
 
+    i = 0;
+
+    for percipitation in ujson.loads(msg)['rain']:
+        np[i] = (0, 0, 255)
+        i = i+1
+    np.write()
 
 def main(server=SERVER):
     c = MQTTClient(CLIENT_ID, server)
@@ -46,3 +40,4 @@ def main(server=SERVER):
     finally:
         c.disconnect()
 
+main()

@@ -1,15 +1,13 @@
-# This file is executed on every boot (including wake-boot from deepsleep)
-#import esp
-#esp.osdebug(None)
 import network
-# import webrepl
 
-# Config
+# ------------------------------------------------
+# CONFIG -----------------------------------------
 # ------------------------------------------------
 WIFI_ESSID = 'Toad2G'
 WIFI_PASSWORD = 'Madmen!!'
 
-# Network
+# ------------------------------------------------
+# NETWORK ----------------------------------------
 # ------------------------------------------------
 def connect_to_network():
     sta_if = network.WLAN(network.STA_IF)
@@ -22,7 +20,8 @@ def connect_to_network():
 
     print('network config:', sta_if.ifconfig())
 
-# Web REPL
-# ------------------------------------------------
-# webrepl.start()
+# ================================================
+# MAIN ===========================================
+# ================================================
+connect_to_network()
 
