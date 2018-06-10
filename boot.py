@@ -1,10 +1,5 @@
 import network
-
-# ------------------------------------------------
-# CONFIG -----------------------------------------
-# ------------------------------------------------
-WIFI_ESSID = 'Toad2G'
-WIFI_PASSWORD = 'Madmen!!'
+import env
 
 # ------------------------------------------------
 # NETWORK ----------------------------------------
@@ -14,7 +9,7 @@ def connect_to_network():
     if not sta_if.isconnected():
         print('connecting to network...')
         sta_if.active(True)
-        sta_if.connect(WIFI_ESSID, WIFI_PASSWORD)
+        sta_if.connect(env.WIFI_ESSID, env.WIFI_PASSWORD)
         while not sta_if.isconnected():
             pass
 
