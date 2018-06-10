@@ -18,10 +18,12 @@ def sub_cb(topic, msg):
     print((topic, msg))
     print(ujson.loads(msg))
 
-    i = 0;
+    np[0] = (255, 255, 255)
 
-    for percipitation in ujson.loads(msg)['rain']:
-        np[i] = (0, 0, 255)
+    i = 1;
+
+    for precipitation in ujson.loads(msg)['rain']:
+        np[i] = (0, 0, precipitation)
         i = i+1
     np.write()
 
