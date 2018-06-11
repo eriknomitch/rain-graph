@@ -42,4 +42,4 @@ def main(server=SERVER):
     finally:
         c.disconnect()
 
-main()
+# main()
