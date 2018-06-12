@@ -19,6 +19,7 @@ def np_clear():
 
     for i in range(np.n):
         np[i] = (0, 0, 0)
+
     np.write()
 
 def np_status_blink():
@@ -64,6 +65,8 @@ def main(server=SERVER):
     c.connect()
     c.subscribe(TOPIC)
     print("Connected to %s, subscribed to %s topic" % (server, TOPIC))
+
+    np_clear()
 
     #np_status_blink()
 
