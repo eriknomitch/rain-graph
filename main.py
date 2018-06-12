@@ -23,18 +23,18 @@ def np_clear():
 
 def np_status_blink():
     global np
-    for i in range(10):
-        np[0] = (0, 255, 0)
-        np.write()
-        time.sleep_ms(100)
-        np[0] = (0, 0, 0)
-        np.write()
-        time.sleep_ms(100)
+
+    np_clear()
+
+    np[0] = (0, 255, 0)
+
+    time.sleep_ms(1000)
+
+    np_clear()
 
 
 def sub_cb(topic, msg):
     global np
-    global NUM_PIXELS
 
     print((topic, msg))
     print(ujson.loads(msg))
@@ -45,10 +45,16 @@ def sub_cb(topic, msg):
 
     i = 1;
 
-    for precipitation in ujson.loads(msg)['rain']:
-        np[i] = (0, 0, precipitation)
-        i = i+1
-    np.write()
+    try:
+        for precipitation in ujson.loads(msg)['rain']:
+            np[i] = (0, 0, precipitation)
+            i = i+1
+        np.write()
+    except:
+        np_clear()
+        np[2] = (1, 0, 0)
+        np.write()
+
 
 def main(server=SERVER):
 
@@ -59,7 +65,7 @@ def main(server=SERVER):
     c.subscribe(TOPIC)
     print("Connected to %s, subscribed to %s topic" % (server, TOPIC))
 
-    np_status_blink()
+    #np_status_blink()
 
     try:
         while 1:
