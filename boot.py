@@ -1,5 +1,6 @@
 import network
 import env
+import webrepl
 
 # ------------------------------------------------
 # NETWORK ----------------------------------------
@@ -19,6 +20,4 @@ def connect_to_network():
 # MAIN ===========================================
 # ================================================
 connect_to_network()
-
-#import webrepl
-#webrepl.start()
+webrepl.start()
